@@ -4,21 +4,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'attendanceData';
 
   function saveAll() {
-    const data = [];
-    document.querySelectorAll('.subject-card').forEach(card => {
-      const name = card.querySelector('.subject-name').value.trim();
-      if (!name) return;
-      const days = [];
-      card.querySelectorAll('tbody tr').forEach(row => {
-        const date = row.querySelector('input[type="date"]').value;
-        const present = row.querySelector('input[type="checkbox"]').checked;
-        const reason = row.querySelector('.reason-input').value.trim();
-        days.push({ date, present, reason });
-      });
-      data.push({ name, days });
+  const data = [];
+  document.querySelectorAll('.subject-card').forEach(card => {
+    const name = card.querySelector('.subject-name').value.trim();
+    if (!name) return;
+    const days = [];
+    card.querySelectorAll('tbody tr').forEach(row => {
+      const date = row.querySelector('input[type="date"]').value;
+      const present = row.querySelector('input[type="checkbox"]').checked;
+      const reason = row.querySelector('.reason-input').value.trim();
+      days.push({ date, present, reason });
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+    const subjectData = { name, days };
+    data.push(subjectData);
+    saveAttendanceToServer(subjectData); // 👈 this sends it to backend
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
 
   function addDayRow(tableBody, initial = {}) {
     const tr = document.createElement('tr');
@@ -150,4 +153,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   addSubjectBtn.addEventListener('click', () => createSubject());
+
 });
+
+async function saveAttendanceToServer(data) {
+  try {
+    const response = await fetch('http://127.0.0.1:5000/add-attendance', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    console.log("Backend:", result.message);
+  } catch (err) {
+    console.error("Failed to send to backend:", err);
+  }
+}
