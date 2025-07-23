@@ -54,6 +54,8 @@ python app.py
 Go back to the root folder
 
 Open index.html in your browser
+
+
 🙋‍♀️ Author
 Apeksha Bharti
 
